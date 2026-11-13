@@ -7,12 +7,12 @@
 <style>
 :root{
   --bg:#f6f7f9; --panel:#ffffff; --ink:#1c2430; --muted:#5b6574; --line:#d6dbe2; --faint:#c3c9d2;
-  --node:#eceff3; --d1:#2f7fd6; --d2:#e08a12; --d3:#4f8a1e; --focus:#1c2430; --accent:#d63e5c;
+  --node:#eceff3; --d1:#2f7fd6; --d2:#e08a12; --d3:#4f8a1e; --d4:#a23fb0; --focus:#1c2430; --accent:#d63e5c;
   --t1:#7a4fd6; --t2:#a68de6; --t3:#cdbff2;
 }
 @media (prefers-color-scheme: dark){
   :root{ --bg:#141a22; --panel:#1b232d; --ink:#e8ecf1; --muted:#9aa6b5; --line:#2c3643; --faint:#3a4655;
-    --node:#243040; --d1:#5aa2ee; --d2:#f0a73a; --d3:#7ab648; --focus:#e8ecf1; --accent:#ff6b86;
+    --node:#243040; --d1:#5aa2ee; --d2:#f0a73a; --d3:#7ab648; --d4:#d58be0; --focus:#e8ecf1; --accent:#ff6b86;
     --t1:#b39bf5; --t2:#8d73d6; --t3:#6a579f; }
 }
 *{box-sizing:border-box}
@@ -81,10 +81,10 @@ h3{font-size:.95rem;margin:18px 0 8px;font-weight:700}
   <p class="note" id="note"></p>
 </div>
 <script>
-// ---- Data. Edit here. One line per chat: [player, player, day]. Day is "D1", "D2" or "D3".
-const UPDATED = "11 Nov";
+// ---- Data. Edit here. One line per chat: [player, player, day]. Day is "D1", "D2", "D3" or "D4".
+const UPDATED = "12 Nov, evening";
 const PLAYERS = ["Maki","Doow","Elannqa","Tieske","Peanut","Tritenaar","Geraldine","Kai","Hond","Stickle","Meeshab","Leon","Havensand","Hwol","DanceRev"];
-const DEAD = ["Peanut","Hwol"];
+const DEAD = ["Peanut","Hwol","Tritenaar","Kai"];
 const CHATS = [
   ["DanceRev", "Havensand", "D1"],
   ["DanceRev", "Hond", "D1"],
@@ -144,11 +144,26 @@ const CHATS = [
   ["Leon", "Geraldine", "D3"],
   ["Meeshab", "Peanut", "D3"],
   ["Doow", "Hwol", "D3"],
+  ["Doow", "Hond", "D4"],
+  ["Doow", "Meeshab", "D4"],
+  ["Havensand", "Hwol", "D4"],
+  ["Kai", "Leon", "D4"],
+  ["Hwol", "Peanut", "D4"],
+  ["Elannqa", "Tieske", "D4"],
+  ["Leon", "Meeshab", "D4"],
+  ["DanceRev", "Tieske", "D4"],
+  ["Meeshab", "Peanut", "D4"],
+  ["Havensand", "DanceRev", "D4"],
+  ["Havensand", "Elannqa", "D4"],
+  ["Hwol", "Tieske", "D4"],
+  ["Peanut", "Doow", "D4"],
+  ["Peanut", "Geraldine", "D4"],
+  ["Doow", "Geraldine", "D4"],
 ];
 // ---- End of data.
 
-const DAYS = ["D1","D2","D3"];
-const DAYCOL = {D1:"var(--d1)", D2:"var(--d2)", D3:"var(--d3)"};
+const DAYS = ["D1","D2","D3","D4"];
+const DAYCOL = {D1:"var(--d1)", D2:"var(--d2)", D3:"var(--d3)", D4:"var(--d4)"};
 const TIERCOL = ["var(--ink)","var(--t1)","var(--t2)","var(--t3)"];
 const dayLabel = d => "Day " + d.slice(1);
 const NS = "http://www.w3.org/2000/svg";
@@ -156,7 +171,7 @@ const svg = document.getElementById("map"), panel = document.getElementById("pan
 document.getElementById("note").textContent = "Lines are chats that were set up. Dotted lines are chains that are possible within one day, because the order of chats is not known. Updated " + UPDATED + ".";
 const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const chats = {D1:new Set(), D2:new Set(), D3:new Set()};
+const chats = {D1:new Set(), D2:new Set(), D3:new Set(), D4:new Set()};
 CHATS.forEach(([a,b,d]) => { chats[d].add(a+"|"+b); chats[d].add(b+"|"+a); });
 let dayFilter="all";
 const activeDays = () => dayFilter==="all" ? DAYS : [dayFilter];
@@ -390,7 +405,7 @@ function segButtons(parent, items, isOn, onPick, label){
 function renderBar(){
   const dseg=document.getElementById("daySeg"); dseg.innerHTML="";
   const dl=document.createElement("span"); dl.className="lbl"; dl.textContent="Day"; dseg.appendChild(dl);
-  [["All","all"],["Day 1","D1"],["Day 2","D2"],["Day 3","D3"]].forEach(([t,v]) => { const b=document.createElement("button"); b.type="button"; b.textContent=t; b.setAttribute("aria-pressed",String(dayFilter===v)); b.addEventListener("click",()=>{ dayFilter=v; renderBar(); if(layout==="cluster") animateTo(targetPositions()); else paint(); render(); }); dseg.appendChild(b); });
+  [["All","all"],["Day 1","D1"],["Day 2","D2"],["Day 3","D3"],["Day 4","D4"]].forEach(([t,v]) => { const b=document.createElement("button"); b.type="button"; b.textContent=t; b.setAttribute("aria-pressed",String(dayFilter===v)); b.addEventListener("click",()=>{ dayFilter=v; renderBar(); if(layout==="cluster") animateTo(targetPositions()); else paint(); render(); }); dseg.appendChild(b); });
   const seg=document.getElementById("layoutSeg"); seg.innerHTML="";
   [["Seat circle","circle"],["Clusters","cluster"]].forEach(([t,v]) => { const b=document.createElement("button"); b.type="button"; b.textContent=t; b.setAttribute("aria-pressed",String(layout===v)); b.addEventListener("click",()=>setLayout(v)); seg.appendChild(b); });
 }
@@ -406,7 +421,7 @@ function render(){
   const r=reach();
   const h=document.createElement("h2"); h.textContent="From "+nm(current); panel.appendChild(h);
   segButtons(panel,[["Direct chats","direct"],["By day","day"],["Any order","any"]],v=>mode===v,v=>{mode=v; if(mode==="direct") target=null; paint();render();},"Show");
-  if(mode==="direct"){} else if(mode==="day") segButtons(panel,[["Day 1",1],["Day 2",2],["Day 3",3]],v=>startDay===v,v=>{startDay=v;paint();render();},"Starts from");
+  if(mode==="direct"){} else if(mode==="day") segButtons(panel,[["Day 1",1],["Day 2",2],["Day 3",3],["Day 4",4]],v=>startDay===v,v=>{startDay=v;paint();render();},"Starts from");
   else segButtons(panel,[["Direct",1],["One step",2],["Two steps",3]],v=>depth===v,v=>{depth=v;paint();render();},"How far");
   const clr=document.createElement("button"); clr.type="button"; clr.className="clear"; clr.textContent="Clear"; clr.addEventListener("click",()=>select(null));
   panel.lastChild.appendChild(clr);
