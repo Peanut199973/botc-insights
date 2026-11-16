@@ -7,14 +7,14 @@
 <style>
 :root{
   --bg:#f6f7f9; --panel:#ffffff; --ink:#1c2430; --muted:#5b6574; --line:#d6dbe2; --faint:#c3c9d2;
-  --node:#eceff3; --d1:#2f7fd6; --d2:#e08a12; --d3:#4f8a1e; --d4:#a23fb0; --d5:#0f9b95;
-  --d6:#d94e67; --d7:#5c6bc0; --d8:#8d6e63; --focus:#1c2430; --accent:#d63e5c;
+  --node:#eceff3; --d1:#2f7fd6; --d2:#e08a12; --d3:#4f8a1e; --d4:#a23fb0; --d5:#0f9b95; --d6:#c93b6b; --d7:#4b5cc4; --d8:#8c5a2b;
+  --focus:#1c2430; --accent:#d63e5c;
   --t1:#7a4fd6; --t2:#a68de6; --t3:#cdbff2;
 }
 @media (prefers-color-scheme: dark){
   :root{ --bg:#141a22; --panel:#1b232d; --ink:#e8ecf1; --muted:#9aa6b5; --line:#2c3643; --faint:#3a4655;
-    --node:#243040; --d1:#5aa2ee; --d2:#f0a73a; --d3:#7ab648; --d4:#d58be0; --d5:#4fd1c9;
-    --d6:#f27a90; --d7:#909ef0; --d8:#bcaaa4; --focus:#e8ecf1; --accent:#ff6b86;
+    --node:#243040; --d1:#5aa2ee; --d2:#f0a73a; --d3:#7ab648; --d4:#d58be0; --d5:#4fd1c9; --d6:#f2729c; --d7:#8596f5; --d8:#d49b66;
+    --focus:#e8ecf1; --accent:#ff6b86;
     --t1:#b39bf5; --t2:#8d73d6; --t3:#6a579f; }
 }
 *{box-sizing:border-box}
@@ -25,17 +25,18 @@ header{grid-column:1/-1}
 h1{font-size:1.6rem;line-height:1.2;margin:0 0 6px;font-weight:700;letter-spacing:-0.01em}
 header p{margin:0;color:var(--muted);max-width:62ch}
 .stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 8px 8px}
-.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:0 8px 4px}
+.bar{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:0 8px 6px}
 .hint{color:var(--muted);font-size:.85rem}
 svg{display:block;width:100%;height:auto}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;align-self:start}
 .panel h2{font-size:1.25rem;margin:0 0 4px}
 .empty{color:var(--muted);margin:0}
-.seg{display:flex;gap:6px;margin:8px 0 12px;flex-wrap:wrap;align-items:center}
-.seg button{font:inherit;font-size:.9rem;padding:6px 12px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;cursor:pointer}
+.seg{display:flex;gap:5px;margin:8px 0 12px;flex-wrap:wrap;align-items:center}
+.seg button{font:inherit;font-size:.88rem;padding:5px 10px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg button .swatch{width:8px;height:8px;border-radius:50%;display:inline-block}
 .seg .clear{margin-left:auto}
-.seg .lbl{color:var(--muted);font-size:.9rem;margin-right:2px}
+.seg .lbl{color:var(--muted);font-size:.88rem;margin-right:2px;font-weight:600}
 .bar .seg{margin:0}
 button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .node{outline:none;cursor:pointer}
@@ -73,20 +74,20 @@ h3{font-size:.95rem;margin:18px 0 8px;font-weight:700}
 <div class="wrap">
   <header>
     <h1>Chat whispers</h1>
-    <p>Tap a player to see who they chatted with, day by day. Switch to By day or Any order to see who could have heard from them, and pick a second player to see the chain between them.</p>
+    <p>Tap a player to see who they chatted with, day by day. Toggle multiple days on or off (e.g. D1–D3) to isolate specific phases, and pick a second player to trace unique chains between them.</p>
   </header>
   <div class="stage">
-    <div class="bar"><div class="seg" id="layoutSeg" role="group" aria-label="Layout"></div><div class="seg" id="daySeg" role="group" aria-label="Day"></div><span class="hint">Larger circles mean more chats.</span></div>
+    <div class="bar"><div class="seg" id="layoutSeg" role="group" aria-label="Layout"></div><div class="seg" id="daySeg" role="group" aria-label="Days"></div><span class="hint">Larger circles mean more chats.</span></div>
     <svg id="map" viewBox="-30 0 700 660" role="group" aria-label="Players. Select a player to see who they could have reached."></svg>
   </div>
   <aside class="panel" id="panel" aria-live="polite"></aside>
   <p class="note" id="note"></p>
 </div>
 <script>
-// ---- Data. Edit here. One line per chat: [player, player, day]. Day is "D1" to "D8".
-const UPDATED = "15 Nov, night (D1–D7)";
-const PLAYERS = ["Maki","Doow","Elannqa","Tieske","Peanut","Tritenaar","Geraldine","Kai","Hond","Stickle","Meeshab","Leon","Havensand","Hwol","DanceRev"];
-const DEAD = ["Peanut","Hwol","Tritenaar","Kai","Hond","Elannqa","Geraldine"];
+// ---- Data. Edit here. One line per chat: [player, player, day]. Day is "D1" through "D8".
+const UPDATED = "16 Nov (through Day 7)";
+const PLAYERS = ['Maki', 'Doow', 'Elannqa', 'Tieske', 'Peanut', 'Tritenaar', 'Geraldine', 'Kai', 'Hond', 'Stickle', 'Meeshab', 'Leon', 'Havensand', 'Hwol', 'DanceRev'];
+const DEAD = ['Peanut', 'Hwol', 'Tritenaar', 'Kai', 'Hond', 'Elannqa', 'Geraldine', 'Doow', 'Meeshab', 'Leon'];
 const CHATS = [
   ["DanceRev", "Havensand", "D1"],
   ["DanceRev", "Hond", "D1"],
@@ -181,11 +182,11 @@ const CHATS = [
   ["DanceRev", "Tieske", "D5"],
   ["Havensand", "Elannqa", "D5"],
   ["Elannqa", "Geraldine", "D5"],
+  ["Leon", "Meeshab", "D6"],
+  ["Geraldine", "Leon", "D6"],
   ["Leon", "Peanut", "D6"],
   ["Leon", "Hwol", "D6"],
   ["Peanut", "Hwol", "D6"],
-  ["Leon", "Meeshab", "D6"],
-  ["Geraldine", "Leon", "D6"],
   ["Hwol", "Doow", "D6"],
   ["Doow", "Geraldine", "D6"],
   ["Geraldine", "Maki", "D6"],
@@ -199,32 +200,34 @@ const CHATS = [
   ["Tieske", "Doow", "D7"],
   ["Doow", "Peanut", "D7"],
   ["Hwol", "Peanut", "D7"],
-  ["Havensand", "Tieske", "D7"],
-  ["Havensand", "DanceRev", "D7"],
-  ["Tieske", "DanceRev", "D7"],
   ["Havensand", "Stickle", "D7"],
   ["Elannqa", "Tieske", "D7"],
   ["Elannqa", "Leon", "D7"],
   ["Havensand", "Hond", "D7"],
   ["Peanut", "Elannqa", "D7"],
+  ["Havensand", "Tieske", "D7"],
+  ["Havensand", "DanceRev", "D7"],
+  ["Tieske", "DanceRev", "D7"],
 ];
 // ---- End of data.
 
-const DAYS = ["D1","D2","D3","D4","D5","D6","D7","D8"];
+const ALL_DAYS = ["D1","D2","D3","D4","D5","D6","D7","D8"];
 const DAYCOL = {D1:"var(--d1)", D2:"var(--d2)", D3:"var(--d3)", D4:"var(--d4)", D5:"var(--d5)", D6:"var(--d6)", D7:"var(--d7)", D8:"var(--d8)"};
 const TIERCOL = ["var(--ink)","var(--t1)","var(--t2)","var(--t3)"];
 const dayLabel = d => "Day " + d.slice(1);
+const shortDay = d => "D" + d.slice(1);
 const NS = "http://www.w3.org/2000/svg";
 const svg = document.getElementById("map"), panel = document.getElementById("panel");
 document.getElementById("note").textContent = "Lines are chats that were set up. Dotted lines are chains that are possible within one day, because the order of chats is not known. Updated " + UPDATED + ".";
 const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const chats = {};
-DAYS.forEach(d => chats[d] = new Set());
+const chats = {D1:new Set(), D2:new Set(), D3:new Set(), D4:new Set(), D5:new Set(), D6:new Set(), D7:new Set(), D8:new Set()};
 CHATS.forEach(([a,b,d]) => { if(chats[d]){ chats[d].add(a+"|"+b); chats[d].add(b+"|"+a); } });
-let dayFilter="all";
-const activeDays = () => dayFilter==="all" ? DAYS : [dayFilter];
-const partners = (p,d) => (dayFilter==="all"||d===dayFilter) ? PLAYERS.filter(q => chats[d].has(p+"|"+q)) : [];
+
+// Multi-select day filter: Set of active day codes (defaults to all days with chats, or all D1-D8)
+let selectedDays = new Set(ALL_DAYS);
+const activeDays = () => ALL_DAYS.filter(d => selectedDays.has(d));
+const partners = (p,d) => selectedDays.has(d) ? PLAYERS.filter(q => chats[d].has(p+"|"+q)) : [];
 const anyPartners = p => PLAYERS.filter(q => activeDays().some(d => chats[d].has(p+"|"+q)));
 const daysBetween = (p,q) => activeDays().filter(d => chats[d].has(p+"|"+q));
 const radius = p => 9 + anyPartners(p).length*0.9;
@@ -259,8 +262,13 @@ function simulate(names, pairs){
   }
   return P;
 }
-function clusterLayout(filter){
-  const w={}; CHATS.forEach(([a,b,d]) => { if(filter!=="all" && d!==filter) return; const k=[a,b].sort().join("|"); w[k]=(w[k]||0)+1; });
+function clusterLayout(dayKey){
+  const w={};
+  CHATS.forEach(([a,b,d]) => {
+    if(!selectedDays.has(d)) return;
+    const k=[a,b].sort().join("|");
+    w[k]=(w[k]||0)+1;
+  });
   const pairs=Object.keys(w).map(k => { const [a,b]=k.split("|"); return [a,b,w[k]]; });
   const group={}; PLAYERS.forEach(p=>group[p]=p);
   const find=x=>group[x]===x?x:(group[x]=find(group[x]));
@@ -287,7 +295,9 @@ function clusterLayout(filter){
   slots.forEach(sl => { sl.c.forEach((p,i) => { out[p]={x:x0+i*80+40, y:600}; }); x0+=sl.wd; });
   return out;
 }
-const clusterCache={}; const clusterFor = f => clusterCache[f] || (clusterCache[f]=clusterLayout(f));
+const clusterCache={};
+const clusterKey = () => activeDays().join(",") || "none";
+const clusterFor = () => { const k=clusterKey(); return clusterCache[k] || (clusterCache[k]=clusterLayout(k)); };
 
 let layout="circle";
 const cur = {}; PLAYERS.forEach(p => cur[p]={x:seat[p].x, y:seat[p].y});
@@ -318,21 +328,25 @@ let current=null, target=null, mode="direct", startDay=1, depth=2, labelsOn=true
 function reachDay(start, from){
   const S=new Set([start]), P=new Set([start]);
   const reached={}; reached[start]=0; const stages=[], edges=[], status={}; status[start]="start";
-  for(let di=from-1; di<DAYS.length; di++){
-    const d=DAYS[di], S0=new Set(S), fresh=[], maybe=[];
+  const days = activeDays();
+  for(let di=0; di<days.length; di++){
+    const d=days[di];
+    const dNum = Number(d.slice(1));
+    if(dNum < from) continue;
+    const S0=new Set(S), fresh=[], maybe=[];
     for(const p of S0) for(const q of partners(p,d)) if(!S.has(q)){ edges.push({p,q,c:DAYCOL[d],solid:p===start,dotted:false}); if(!fresh.includes(q)) fresh.push(q); }
-    fresh.forEach(q => { S.add(q); P.add(q); reached[q]=di+1; status[q]="sure"; });
+    fresh.forEach(q => { S.add(q); P.add(q); reached[q]=dNum; status[q]="sure"; });
     let grew=true; const pool=new Set(P);
     while(grew){ grew=false;
       for(const p of Array.from(pool)) for(const q of partners(p,d)) if(!pool.has(q)){
         pool.add(q); grew=true; edges.push({p,q,c:DAYCOL[d],solid:false,dotted:true});
-        if(!(q in reached)){ reached[q]=di+1; status[q]="maybe"; maybe.push(q); }
+        if(!(q in reached)){ reached[q]=dNum; status[q]="maybe"; maybe.push(q); }
         P.add(q);
       }
     }
     stages.push({label:"After "+dayLabel(d), color:DAYCOL[d], fresh, maybe, day:d});
   }
-  return {reached, stages, edges, status, colorOf:q=>DAYCOL[DAYS[reached[q]-1]]};
+  return {reached, stages, edges, status, colorOf:q=>DAYCOL["D"+reached[q]]};
 }
 function reachAny(start, maxTier){
   const reached={}; reached[start]=0; const stages=[], edges=[]; let prev=[start];
@@ -349,35 +363,78 @@ function reachAny(start, maxTier){
 function reachDirect(start){
   const reached={}; reached[start]=0; const stages=[], edges=[], status={}; status[start]="start";
   const seenPair={};
-  DAYS.forEach((d,di) => {
+  activeDays().forEach(d => {
+    const dNum = Number(d.slice(1));
     const fresh=partners(start,d);
-    fresh.forEach(q => { if(!(q in reached)){ reached[q]=di+1; status[q]="sure"; } const k=seenPair[q]=(seenPair[q]||0)+1; edges.push({p:start,q,c:DAYCOL[d],solid:true,dotted:false,off:k-1}); });
+    fresh.forEach(q => {
+      if(!(q in reached)){ reached[q]=dNum; status[q]="sure"; }
+      const k=seenPair[q]=(seenPair[q]||0)+1;
+      edges.push({p:start,q,c:DAYCOL[d],solid:true,dotted:false,off:k-1});
+    });
     stages.push({label:dayLabel(d), color:DAYCOL[d], fresh, maybe:[], day:d});
   });
-  return {reached, stages, edges, status, colorOf:q=>DAYCOL[DAYS[reached[q]-1]]};
+  return {reached, stages, edges, status, colorOf:q=>DAYCOL["D"+reached[q]]};
 }
 const reach = () => mode==="direct" ? reachDirect(current) : (mode==="day" ? reachDay(current,startDay) : reachAny(current,depth));
-const directNow = n => mode==="day" ? activeDays().filter(d=>DAYS.indexOf(d)>=startDay-1).some(d=>chats[d].has(current+"|"+n)) : anyPartners(current).includes(n);
+const directNow = n => mode==="day" ? activeDays().filter(d=>Number(d.slice(1))>=startDay).some(d=>chats[d].has(current+"|"+n)) : anyPartners(current).includes(n);
 
+// Deduplicated route finder: collapses repeated player sequences into single unique chains with day tags
 function routesTo(start, goal){
-  const out=[];
-  (function go(c, minDay, path){
-    if(c===goal){ out.push(path.slice()); return; }
-    if(path.length>=4) return;
+  const raw=[];
+  const days = activeDays();
+  (function go(c, minDayNum, path, visited){
+    if(c===goal){ raw.push(path.slice()); return; }
+    if(path.length>=3) return;
     if(mode==="day"){
-      for(let di=minDay; di<DAYS.length; di++) for(const q of partners(c,DAYS[di])){
-        if(q===start || path.some(h=>h.p===q)) continue;
-        path.push({p:c,q,days:[DAYS[di]]}); go(q,di,path); path.pop();
+      for(let di=0; di<days.length; di++){
+        const d = days[di];
+        const dNum = Number(d.slice(1));
+        if(dNum < minDayNum) continue;
+        for(const q of partners(c,d)){
+          if(visited.has(q)) continue;
+          visited.add(q);
+          path.push({p:c,q,days:[d]});
+          go(q, dNum, path, visited);
+          path.pop();
+          visited.delete(q);
+        }
       }
     } else {
       for(const q of anyPartners(c)){
-        if(q===start || path.some(h=>h.p===q)) continue;
-        path.push({p:c,q,days:daysBetween(c,q)}); go(q,0,path); path.pop();
+        if(visited.has(q)) continue;
+        visited.add(q);
+        path.push({p:c,q,days:daysBetween(c,q)});
+        go(q, 0, path, visited);
+        path.pop();
+        visited.delete(q);
       }
     }
-  })(start, startDay-1, []);
-  out.forEach(rt => { rt.same = mode==="day" && rt.some((h,i)=> i>0 && h.days[0]===rt[i-1].days[0]); });
-  out.sort((a,b)=> (a.same-b.same) || a.length-b.length || a.map(h=>h.days[0]).join().localeCompare(b.map(h=>h.days[0]).join()));
+  })(start, startDay, [], new Set([start]));
+
+  // Deduplicate identical player paths (e.g. A -> X -> B via D1/D2 vs D1/D3) by merging hop days
+  const merged = new Map();
+  raw.forEach(rt => {
+    const nodeSeq = [start, ...rt.map(h => h.q)].join("->");
+    if(!merged.has(nodeSeq)){
+      merged.set(nodeSeq, rt.map(h => ({p:h.p, q:h.q, days:new Set(h.days)})));
+    } else {
+      const existing = merged.get(nodeSeq);
+      rt.forEach((h, idx) => h.days.forEach(d => existing[idx].days.add(d)));
+    }
+  });
+
+  const out = Array.from(merged.values()).map(rt => {
+    const clean = rt.map(h => ({
+      p: h.p,
+      q: h.q,
+      days: ALL_DAYS.filter(d => h.days.has(d))
+    }));
+    // Mark as potentially same-day if any consecutive hops share a single common day
+    clean.same = mode==="day" && clean.some((h, i) => i>0 && h.days.length===1 && clean[i-1].days.length===1 && h.days[0]===clean[i-1].days[0]);
+    return clean;
+  });
+
+  out.sort((a,b)=> a.length-b.length || (a.same-b.same) || a.map(h=>h.days[0]).join().localeCompare(b.map(h=>h.days[0]).join()));
   return out;
 }
 
@@ -409,14 +466,14 @@ function paint(){
   r.edges.forEach(e => { let ox=0, oy=0; if(e.off){ const dx=cur[e.q].x-cur[e.p].x, dy=cur[e.q].y-cur[e.p].y, L=Math.hypot(dx,dy)||1; ox=-dy/L*e.off*5; oy=dx/L*e.off*5; } el("line",{x1:cur[e.p].x+ox,y1:cur[e.p].y+oy,x2:cur[e.q].x+ox,y2:cur[e.q].y+oy,stroke:e.c,"stroke-width":e.solid?3:2.2,"stroke-dasharray":e.dotted?"1.5 6":(e.solid?"none":"5 4"),opacity:e.dotted?dim*0.9:dim,"stroke-linecap":"round"},gPath); });
   Object.keys(r.reached).forEach(n => { if(n===current) return; const c=nodes[n].core; const maybe=r.status && r.status[n]==="maybe"; c.setAttribute("fill",r.colorOf(n)); c.setAttribute("fill-opacity",maybe?0.3:1); c.setAttribute("stroke",r.colorOf(n)); if(mode!=="direct" && directNow(n)){ c.setAttribute("stroke","var(--ink)"); c.setAttribute("stroke-width",3); } });
   if(target){
-    routesTo(current,target).slice(0,8).forEach(rt => rt.forEach((h,i) => { const sameHop = mode==="day" && i>0 && h.days[0]===rt[i-1].days[0]; el("line",{x1:cur[h.p].x,y1:cur[h.p].y,x2:cur[h.q].x,y2:cur[h.q].y,stroke:mode==="day"?DAYCOL[h.days[0]]:"var(--t1)","stroke-width":5,"stroke-dasharray":sameHop?"1.5 8":"none",opacity:1,"stroke-linecap":"round"},gPath); }));
+    routesTo(current,target).slice(0,8).forEach(rt => rt.forEach((h,i) => { const sameHop = mode==="day" && i>0 && h.days.length===1 && rt[i-1].days.length===1 && h.days[0]===rt[i-1].days[0]; el("line",{x1:cur[h.p].x,y1:cur[h.p].y,x2:cur[h.q].x,y2:cur[h.q].y,stroke:mode==="day"?DAYCOL[h.days[0]]:"var(--t1)","stroke-width":5,"stroke-dasharray":sameHop?"1.5 8":"none",opacity:1,"stroke-linecap":"round"},gPath); }));
     nodes[target].core.setAttribute("stroke","var(--ink)"); nodes[target].core.setAttribute("stroke-width",4);
   }
   const c=nodes[current]; c.core.setAttribute("fill","var(--ink)"); c.core.setAttribute("stroke","var(--ink)"); c.halo.setAttribute("opacity",1); c.g.setAttribute("aria-pressed","true");
 }
 
 function targetPositions(){
-  const to={}; PLAYERS.forEach(p => to[p] = layout==="circle" ? {x:seat[p].x,y:seat[p].y} : clusterFor(dayFilter)[p]);
+  const to={}; PLAYERS.forEach(p => to[p] = layout==="circle" ? {x:seat[p].x,y:seat[p].y} : clusterFor()[p]);
   return to;
 }
 function animateTo(to){
@@ -435,7 +492,7 @@ function setLayout(next){
   layout=next; renderBar(); animateTo(targetPositions());
 }
 
-// ---- Panel
+// ---- Panel & Multi-select Day Bar
 function nameButtons(list){
   const wrap=document.createElement("div"); wrap.className="names";
   list.forEach(n => { const b=document.createElement("button"); b.type="button"; b.textContent=nm(n); b.addEventListener("click",()=>{ target=n; if(mode==="direct") mode="day"; paint(); render(); }); wrap.appendChild(b); });
@@ -447,12 +504,51 @@ function segButtons(parent, items, isOn, onPick, label){
   items.forEach(([text,val]) => { const b=document.createElement("button"); b.type="button"; b.textContent=text; b.setAttribute("aria-pressed",String(isOn(val))); b.addEventListener("click",()=>onPick(val)); seg.appendChild(b); });
   parent.appendChild(seg); return seg;
 }
+function syncStartDay(){
+  const days = activeDays().map(d => Number(d.slice(1)));
+  if(days.length && !days.includes(startDay)) startDay = days[0];
+}
+function refreshAfterDayChange(){
+  syncStartDay();
+  renderBar();
+  if(layout==="cluster") animateTo(targetPositions());
+  else paint();
+  render();
+}
 function renderBar(){
-  const dseg=document.getElementById("daySeg"); dseg.innerHTML="";
-  const dl=document.createElement("span"); dl.className="lbl"; dl.textContent="Day"; dseg.appendChild(dl);
-  [["All","all"],["Day 1","D1"],["Day 2","D2"],["Day 3","D3"],["Day 4","D4"],["Day 5","D5"],["Day 6","D6"],["Day 7","D7"],["Day 8","D8"]].forEach(([t,v]) => { const b=document.createElement("button"); b.type="button"; b.textContent=t; b.setAttribute("aria-pressed",String(dayFilter===v)); b.addEventListener("click",()=>{ dayFilter=v; renderBar(); if(layout==="cluster") animateTo(targetPositions()); else paint(); render(); }); dseg.appendChild(b); });
   const seg=document.getElementById("layoutSeg"); seg.innerHTML="";
   [["Seat circle","circle"],["Clusters","cluster"]].forEach(([t,v]) => { const b=document.createElement("button"); b.type="button"; b.textContent=t; b.setAttribute("aria-pressed",String(layout===v)); b.addEventListener("click",()=>setLayout(v)); seg.appendChild(b); });
+
+  const dseg=document.getElementById("daySeg"); dseg.innerHTML="";
+  const dl=document.createElement("span"); dl.className="lbl"; dl.textContent="Days:"; dseg.appendChild(dl);
+
+  const allOn = selectedDays.size === ALL_DAYS.length;
+  const bAll=document.createElement("button"); bAll.type="button"; bAll.textContent="All";
+  bAll.setAttribute("aria-pressed", String(allOn));
+  bAll.addEventListener("click",()=>{ selectedDays = new Set(ALL_DAYS); refreshAfterDayChange(); });
+  dseg.appendChild(bAll);
+
+  ALL_DAYS.forEach(d => {
+    const b=document.createElement("button"); b.type="button";
+    const sw=document.createElement("span"); sw.className="swatch"; sw.style.background=DAYCOL[d];
+    b.appendChild(sw);
+    b.appendChild(document.createTextNode(shortDay(d)));
+    const isPressed = !allOn && selectedDays.has(d);
+    b.setAttribute("aria-pressed", String(isPressed));
+    b.title = "Toggle " + dayLabel(d) + " (tap multiple days to combine, e.g. D1, D2, D3)";
+    b.addEventListener("click",()=>{
+      if(allOn){
+        selectedDays = new Set([d]);
+      } else if(selectedDays.has(d)){
+        selectedDays.delete(d);
+        if(selectedDays.size === 0) selectedDays = new Set(ALL_DAYS);
+      } else {
+        selectedDays.add(d);
+      }
+      refreshAfterDayChange();
+    });
+    dseg.appendChild(b);
+  });
 }
 function rowEl(tagText, color, content){
   const row=document.createElement("div"); row.className="row";
@@ -466,8 +562,10 @@ function render(){
   const r=reach();
   const h=document.createElement("h2"); h.textContent="From "+nm(current); panel.appendChild(h);
   segButtons(panel,[["Direct chats","direct"],["By day","day"],["Any order","any"]],v=>mode===v,v=>{mode=v; if(mode==="direct") target=null; paint();render();},"Show");
-  if(mode==="direct"){} else if(mode==="day") segButtons(panel,[["Day 1",1],["Day 2",2],["Day 3",3],["Day 4",4],["Day 5",5],["Day 6",6],["Day 7",7],["Day 8",8]],v=>startDay===v,v=>{startDay=v;paint();render();},"Starts from");
-  else segButtons(panel,[["Direct",1],["One step",2],["Two steps",3]],v=>depth===v,v=>{depth=v;paint();render();},"How far");
+  if(mode==="direct"){} else if(mode==="day"){
+    const dayOpts = activeDays().map(d => [shortDay(d), Number(d.slice(1))]);
+    if(dayOpts.length) segButtons(panel,dayOpts,v=>startDay===v,v=>{startDay=v;paint();render();},"Starts from");
+  } else segButtons(panel,[["Direct",1],["One step",2],["Two steps",3]],v=>depth===v,v=>{depth=v;paint();render();},"How far");
   const clr=document.createElement("button"); clr.type="button"; clr.className="clear"; clr.textContent="Clear"; clr.addEventListener("click",()=>select(null));
   panel.lastChild.appendChild(clr);
 
@@ -482,27 +580,27 @@ function render(){
 
   if(target){
     const rts=routesTo(current,target), box=document.createElement("div"); box.className="routes";
-    if(!rts.length){ const n=document.createElement("p"); n.className="none"; n.textContent="No chain from "+nm(current)+" to "+nm(target)+(mode==="day"?" from Day "+startDay+" on.":"."); box.appendChild(n); }
-    rts.slice(0,8).forEach(rt => {
+    if(!rts.length){ const n=document.createElement("p"); n.className="none"; n.textContent="No chain from "+nm(current)+" to "+nm(target)+" in selected days."; box.appendChild(n); }
+    rts.slice(0,12).forEach(rt => {
       const d=document.createElement("div"); d.className="route"; if(rt.same) d.style.borderStyle="dotted";
       const a=document.createElement("span"); a.className="chip"; a.textContent=current; d.appendChild(a);
       rt.forEach((hp,i) => {
         const hop=document.createElement("span"); hop.className="hop";
         const dot=document.createElement("i"); dot.style.background=mode==="day"?DAYCOL[hp.days[0]]:"var(--t1)"; hop.appendChild(dot);
-        const sameHop = mode==="day" && i>0 && h.days[0]===rt[i-1].days[0];
-        hop.appendChild(document.createTextNode((hp.days.length===1?dayLabel(hp.days[0]):"Day "+hp.days.map(x=>x.slice(1)).join(" and "))+" chat"+(sameHop?", same day":"")+" \u2192")); d.appendChild(hop);
+        const sameHop = mode==="day" && i>0 && hp.days.length===1 && rt[i-1].days.length===1 && hp.days[0]===rt[i-1].days[0];
+        const dTxt = hp.days.length===1 ? dayLabel(hp.days[0]) : ("Days " + hp.days.map(x=>x.slice(1)).join(", "));
+        hop.appendChild(document.createTextNode(dTxt + (sameHop?" (same day)":"") + " →")); d.appendChild(hop);
         const c=document.createElement("span"); c.className="chip"+(i===rt.length-1?" end":""); c.textContent=nm(hp.q); d.appendChild(c);
       });
       box.appendChild(d);
     });
     panel.appendChild(box);
     if(rts.some(x=>x.same)){ const m=document.createElement("p"); m.className="more"; m.textContent="Dotted routes pass through a chain within one day, so the order is not known."; panel.appendChild(m); }
-    if(rts.length>8){ const m=document.createElement("p"); m.className="more"; m.textContent=(rts.length-8)+" more routes not shown."; panel.appendChild(m); }
+    if(rts.length>12){ const m=document.createElement("p"); m.className="more"; m.textContent=(rts.length-12)+" more unique chains not shown."; panel.appendChild(m); }
   }
 
   const h3=document.createElement("h3"); h3.textContent=mode==="direct"?"Chatted with":"Could have reached"; panel.appendChild(h3);
   r.stages.forEach(s => {
-    if(dayFilter!=="all" && s.day && s.day!==dayFilter) return;
     let content=document.createElement("div");
     if(s.fresh.length) content.appendChild(nameButtons(s.fresh)); else if(!(s.maybe&&s.maybe.length)){ const n=document.createElement("div"); n.className="none"; n.textContent=mode==="direct"?"None":"No one new"; content.appendChild(n); }
     if(s.maybe && s.maybe.length){ const l=document.createElement("div"); l.className="none"; l.style.margin="6px 0 4px"; l.textContent="Possibly, through a chain within the day"; content.appendChild(l); const nb=nameButtons(s.maybe); nb.querySelectorAll("button").forEach(b=>b.style.borderStyle="dotted"); content.appendChild(nb); }
@@ -513,8 +611,7 @@ function render(){
 
   if(mode==="direct") return;
   const h3b=document.createElement("h3"); h3b.textContent="Their chats"; panel.appendChild(h3b);
-  DAYS.forEach(d => {
-    if(dayFilter!=="all" && d!==dayFilter) return;
+  activeDays().forEach(d => {
     const list=partners(current,d); let content;
     if(list.length) content=nameButtons(list); else { content=document.createElement("div"); content.className="none"; content.textContent="None"; }
     panel.appendChild(rowEl(dayLabel(d),DAYCOL[d],content));
